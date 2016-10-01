@@ -214,9 +214,9 @@ def setup():
         (r'^/{0}$'.format(api_token), UpdateHandler),
         (r'.*', NOPHandler),
     ], lich=kel_thuzad)
-    application.listen(8443)
+    application.listen(7443)
 
-    yield kel_thuzad.listen('https://www.wcpan.me/bot/{0}'.format(api_token))
+    yield kel_thuzad.listen('https://www.wcpan.me/ypc_bot/{0}'.format(api_token))
 
 
 def parse_config(path):
