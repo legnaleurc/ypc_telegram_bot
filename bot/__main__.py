@@ -1,9 +1,11 @@
+'''
 if __name__ == '__main__' and __package__ == '':
     import os, sys, importlib
     parent_dir = os.path.abspath(os.path.dirname(__file__))
     sys.path.append(os.path.dirname(parent_dir))
     __package__ = os.path.basename(parent_dir)
     importlib.import_module(__package__)
+'''
 
 
 import sys
@@ -16,12 +18,12 @@ import json
 import collections
 
 from tornado import ioloop, gen, options, web, log, httpserver, httpclient, process
-from telezombie import api
+from wcpan.telegram import api
 
 from . import settings, db
 
 
-class KelThuzad(api.TeleLich):
+class KelThuzad(api.BotAgent):
 
     def __init__(self, api_token):
         super(KelThuzad, self).__init__(api_token)
@@ -61,18 +63,17 @@ def command_filter(pattern):
     return real_decorator
 
 
-class UpdateHandler(api.TeleHookHandler):
+class UpdateHandler(api.BotHookHandler):
 
-    @gen.coroutine
-    def on_text(self, message):
+    async def on_text(self, message):
         id_ = message.message_id
         chat = message.chat
         text = message.text
         lich = self.settings['lich']
         for handler in lich.text_handlers:
-            result = yield handler(message)
+            result = await handler(message)
             if result:
-                yield lich.send_message(chat.id_, result, reply_to_message_id=id_)
+                await lich.client.send_message(chat.id_, result, reply_to_message_id=id_)
                 break
         else:
             print('update handler: ', message.text)
@@ -92,9 +93,8 @@ class YPCHandler(object):
     def __init__(self):
         pass
 
-    @gen.coroutine
     @command_filter(r'^/ypc(@\S+)?$')
-    def ypc(self, message, *args, **kwargs):
+    async def ypc(self, message, *args, **kwargs):
         with db.Session() as session:
             murmur = session.query(db.Murmur).all()
             if not murmur:
@@ -102,18 +102,16 @@ class YPCHandler(object):
             mm = random.choice(murmur)
             return mm.sentence
 
-    @gen.coroutine
     @command_filter(r'^/ypc(@\S+)?\s+add\s+(.+)$')
-    def ypc_add(self, message, *args, **kwargs):
+    async def ypc_add(self, message, *args, **kwargs):
         with db.Session() as session:
             mm = db.Murmur(sentence=args[1])
             session.add(mm)
             session.commit()
             return str(mm.id)
 
-    @gen.coroutine
     @command_filter(r'^/ypc(@\S+)?\s+remove\s+(\d+)$')
-    def ypc_remove(self, message, *args, **kwargs):
+    async def ypc_remove(self, message, *args, **kwargs):
         try:
             with db.Session() as session:
                 mm = session.query(db.Murmur).filter_by(id=int(args[1]))
@@ -123,9 +121,8 @@ class YPCHandler(object):
         except Exception:
             return None
 
-    @gen.coroutine
     @command_filter(r'^/ypc(@\S+)?\s+list$')
-    def ypc_list(self, message, *args, **kwargs):
+    async def ypc_list(self, message, *args, **kwargs):
         o = ['']
         with db.Session() as session:
             murmur = session.query(db.Murmur)
@@ -133,9 +130,8 @@ class YPCHandler(object):
                 o.append('{0}: {1}'.format(mm.id, mm.sentence))
         return '\n'.join(o)
 
-    @gen.coroutine
     @command_filter(r'^/ypc(@\S+)?\s+help$')
-    def ypc_help(self, message, *args, **kwargs):
+    async def ypc_help(self, message, *args, **kwargs):
         return '\n'.join((
             '',
             '/ypc',
@@ -146,9 +142,8 @@ class YPCHandler(object):
         ))
 
 
-@gen.coroutine
 @command_filter(r'^/help(@\S+)?$')
-def help(message, *args, **kwargs):
+async def help(message, *args, **kwargs):
     return '\n'.join((
         '',
         '/ypc',
@@ -159,22 +154,21 @@ def help(message, *args, **kwargs):
     ))
 
 
-@gen.coroutine
-def shell_out(*args, **kwargs):
+async def shell_out(*args, **kwargs):
     stdin = kwargs.get('stdin', None)
     if stdin is not None:
         p = process.Subprocess(args, stdin=process.Subprocess.STREAM, stdout=process.Subprocess.STREAM)
-        yield p.stdin.write(stdin.encode('utf-8'))
+        await p.stdin.write(stdin.encode('utf-8'))
         p.stdin.close()
     else:
         p = process.Subprocess(args, stdout=process.Subprocess.STREAM)
-    out = yield p.stdout.read_until_close()
-    exit_code = yield p.wait_for_exit(raise_error=True)
+    out = await p.stdout.read_until_close()
+    exit_code = await p.wait_for_exit(raise_error=True)
     return out.decode('utf-8')
 
 
-@gen.coroutine
-def forever():
+'''
+async def forever():
     api_token = options.options.api_token
 
     kel_thuzad = KelThuzad(api_token)
@@ -189,11 +183,11 @@ def forever():
         ypc.ypc_help,
     ])
 
-    yield kel_thuzad.poll()
+    await kel_thuzad.poll()
+'''
 
 
-@gen.coroutine
-def setup():
+async def setup():
     api_token = options.options.api_token
     dsn = options.options.database
     db.prepare(dsn)
@@ -216,7 +210,7 @@ def setup():
     ], lich=kel_thuzad)
     application.listen(7443)
 
-    yield kel_thuzad.listen('https://www.wcpan.me/ypc_bot/{0}'.format(api_token))
+    await kel_thuzad.listen('https://www.wcpan.me/ypc_bot/{0}'.format(api_token))
 
 
 def parse_config(path):
