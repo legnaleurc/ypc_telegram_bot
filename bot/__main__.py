@@ -71,8 +71,9 @@ class UpdateHandler(api.BotHookHandler):
         text = message.text
         lich = self.settings['lich']
         for handler in lich.text_handlers:
-            result = await handler(message)
+            result = handler(message)
             if result:
+                result = await result
                 await lich.client.send_message(chat.id_, result, reply_to_message_id=id_)
                 break
         else:
