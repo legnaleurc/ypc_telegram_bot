@@ -211,7 +211,7 @@ async def setup():
     ], lich=kel_thuzad)
     application.listen(7443)
 
-    await kel_thuzad.listen('https://www.wcpan.me/ypc_bot/{0}'.format(api_token))
+    await kel_thuzad.listen('https://www.wcpan.me/bot/telegram/ypc/{0}'.format(api_token))
 
 
 def parse_config(path):
