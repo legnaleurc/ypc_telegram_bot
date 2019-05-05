@@ -29,6 +29,13 @@ class Meme(Base):
     name = Column(String(256), nullable=False, unique=True)
     url = Column(String(65536), nullable=False)
 
+class MurmurStory(Base):
+
+    __tablename__ = 'murmurStory'
+
+    id = Column (Integer, primary_key=True)
+    sentence = Column(String(65536), nullable=False)
+
 
 @contextmanager
 def Session():

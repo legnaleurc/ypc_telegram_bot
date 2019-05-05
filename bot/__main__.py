@@ -137,10 +137,56 @@ class YPCHandler(object):
             '',
             '/ypc',
             '/ypc add <sentence>',
+            '/ypc addstory <id> <sentence>',
             '/ypc remove <id>',
+            '/ypc removestory <id> <sentence>',
             '/ypc list',
             '/ypc help',
         ))
+
+    @command_filter(r'^/ypc(@\S+)?\s+story\s+(\d+)$')
+    async def ypc_story(self, message, *args, **kwargs):
+        try:
+            with db.Session() as session:
+                mm = session.query(db.MurmurStory).filter_by(id=int(args[1]))
+                if mm.count() < 1:
+                    return args[1] + '??'
+                m = mm.first()
+                return m.sentence
+        except Exception:
+            return None
+
+    @command_filter(r'^/ypc(@\S+)?\s+addstory\s+(\d+)\s+(.+)$')
+    async def ypc_story_add(self, message, *args, **kwargs):
+        try:
+            with db.Session() as session:
+                mm = session.query(db.Murmur).filter_by(id=int(args[1]))
+                if mm.count() < 1:
+                    return args[1] + '??'
+
+                story = session.query(db.MurmurStory).filter_by(id=int(args[1]))
+                if story.count() < 1:
+                    story = db.MurmurStory(id=int(args[1]), sentence=args[2])
+                    session.add(story)
+                else:
+                    story = story.first()
+                    story.sentence = str(args[2])
+
+                session.commit()
+                return args[2]
+        except Exception:
+            return None
+
+    @command_filter(r'^/ypc(@\S+)?\s+removestory\s+(\d+)$')
+    async def ypc_story_remove(self, message, *args, **kwargs):
+        try:
+            with db.Session() as session:
+                mm = session.query(db.MurmurStory).filter_by(id=int(args[1]))
+                for m in mm:
+                    session.delete(m)
+                return 'story ' + args[1]
+        except Exception:
+            return None
 
 
 @command_filter(r'^/help(@\S+)?$')
@@ -149,7 +195,9 @@ async def help(message, *args, **kwargs):
         '',
         '/ypc',
         '/ypc add <sentence>',
+        '/ypc addstory <id> <sentence>',
         '/ypc remove <id>',
+        '/ypc removestory <id> <sentence>',
         '/ypc list',
         '/ypc help',
     ))
@@ -201,6 +249,9 @@ async def setup():
         ypc.ypc,
         ypc.ypc_add,
         ypc.ypc_remove,
+        ypc.ypc_story,
+        ypc.ypc_story_add,
+        ypc.ypc_story_remove,
         ypc.ypc_list,
         ypc.ypc_help,
     ])
