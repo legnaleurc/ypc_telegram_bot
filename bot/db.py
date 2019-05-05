@@ -31,7 +31,7 @@ class Meme(Base):
 
 class MurmurStory(Base):
 
-    __tablename__ = 'murmurStory'
+    __tablename__ = 'murmur_story'
 
     id = Column (Integer, primary_key=True)
     sentence = Column(String(65536), nullable=False)

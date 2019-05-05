@@ -136,6 +136,7 @@ class YPCHandler(object):
         return '\n'.join((
             '',
             '/ypc',
+            '/ypc story <id>',
             '/ypc add <sentence>',
             '/ypc addstory <id> <sentence>',
             '/ypc remove <id>',
@@ -194,6 +195,7 @@ async def help(message, *args, **kwargs):
     return '\n'.join((
         '',
         '/ypc',
+        '/ypc story <id>'
         '/ypc add <sentence>',
         '/ypc addstory <id> <sentence>',
         '/ypc remove <id>',
