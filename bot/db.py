@@ -1,8 +1,8 @@
 from contextlib import contextmanager
 
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy import Column, Integer, String, ForeignKey, create_engine
+from sqlalchemy.orm import sessionmaker, relationship
 from tornado import options
 
 from . import settings
@@ -19,6 +19,7 @@ class Murmur(Base):
 
     id = Column(Integer, primary_key=True)
     sentence = Column(String(65536), nullable=False)
+    story = relationship("MurmurStory", cascade="save-update, delete")
 
 
 class Meme(Base):
@@ -29,11 +30,16 @@ class Meme(Base):
     name = Column(String(256), nullable=False, unique=True)
     url = Column(String(65536), nullable=False)
 
+
 class MurmurStory(Base):
 
     __tablename__ = 'murmur_story'
 
-    id = Column (Integer, primary_key=True)
+    id = Column(Integer, primary_key=True)
+    murmur_id = Column(Integer, ForeignKey('murmur.id', 
+                                            onupdate='CASCADE',
+                                            ondelete='CASCADE'),
+                                            nullable=False)
     sentence = Column(String(65536), nullable=False)
 
 
@@ -53,6 +59,17 @@ def Session():
 def prepare(dsn):
     global engine
     engine = create_engine(dsn)
+
+    # enable sqlite foreign key feature
+    if engine.name.lower() == 'sqlite':
+        try:
+            connection = engine.raw_connection()
+            cursor = connection.cursor()
+            cursor.execute("PRAGMA foreign_keys = ON;")
+            cursor.close()
+        except Exception:
+            print('something GG')
+
     Base.metadata.create_all(engine)
     global _Session
     _Session = sessionmaker(bind=engine)

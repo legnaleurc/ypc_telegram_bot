@@ -149,7 +149,7 @@ class YPCHandler(object):
     async def ypc_story(self, message, *args, **kwargs):
         try:
             with db.Session() as session:
-                mm = session.query(db.MurmurStory).filter_by(id=int(args[1]))
+                mm = session.query(db.MurmurStory).filter_by(murmur_id=int(args[1]))
                 if mm.count() < 1:
                     return args[1] + '??'
                 m = mm.first()
@@ -164,17 +164,18 @@ class YPCHandler(object):
                 mm = session.query(db.Murmur).filter_by(id=int(args[1]))
                 if mm.count() < 1:
                     return args[1] + '??'
-
-                story = session.query(db.MurmurStory).filter_by(id=int(args[1]))
+                reply = str(args[2])
+                story = session.query(db.MurmurStory).filter_by(murmur_id=int(args[1]))
                 if story.count() < 1:
-                    story = db.MurmurStory(id=int(args[1]), sentence=args[2])
+                    story = db.MurmurStory(murmur_id=int(args[1]), sentence=args[2])
                     session.add(story)
                 else:
                     story = story.first()
+                    reply = story.sentence +'\n----\n' + str(args[2])
                     story.sentence = str(args[2])
 
                 session.commit()
-                return args[2]
+                return reply
         except Exception:
             return None
 
@@ -182,7 +183,7 @@ class YPCHandler(object):
     async def ypc_story_remove(self, message, *args, **kwargs):
         try:
             with db.Session() as session:
-                mm = session.query(db.MurmurStory).filter_by(id=int(args[1]))
+                mm = session.query(db.MurmurStory).filter_by(murmur_id=int(args[1]))
                 for m in mm:
                     session.delete(m)
                 return 'story ' + args[1]
