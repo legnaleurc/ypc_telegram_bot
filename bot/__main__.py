@@ -74,7 +74,8 @@ class UpdateHandler(api.BotHookHandler):
             result = handler(message)
             if result:
                 result = await result
-                await lich.client.send_message(chat.id_, result, reply_to_message_id=id_)
+                for response in result:
+                    await lich.client.send_message(chat.id_, response, reply_to_message_id=id_)
                 break
         else:
             print('update handler: ', message.text)
@@ -101,7 +102,7 @@ class YPCHandler(object):
             if not murmur:
                 return None
             mm = random.choice(murmur)
-            return mm.sentence
+            return [mm.sentence]
 
     @command_filter(r'^/ypc(@\S+)?\s+add\s+(.+)$')
     async def ypc_add(self, message, *args, **kwargs):
@@ -109,7 +110,7 @@ class YPCHandler(object):
             mm = db.Murmur(sentence=args[1])
             session.add(mm)
             session.commit()
-            return str(mm.id)
+            return [str(mm.id)]
 
     @command_filter(r'^/ypc(@\S+)?\s+remove\s+(\d+)$')
     async def ypc_remove(self, message, *args, **kwargs):
@@ -118,41 +119,54 @@ class YPCHandler(object):
                 mm = session.query(db.Murmur).filter_by(id=int(args[1]))
                 for m in mm:
                     session.delete(m)
-                return args[1]
+                return [args[1]]
         except Exception:
             return None
 
     @command_filter(r'^/ypc(@\S+)?\s+list$')
     async def ypc_list(self, message, *args, **kwargs):
-        o = ['']
+        rv = []
         with db.Session() as session:
             murmur = session.query(db.Murmur)
-            for mm in murmur:
-                o.append('{0}: {1}'.format(mm.id, mm.sentence))
-        return '\n'.join(o)
+            for mm_chunk in chunks_of(murmur, 100):
+                msg = ['{0}: {1}'.format(mm.id, mm.sentence) for mm in mm_chunk]
+                msg = '\n' + msg.join('\n')
+                rv.append(msg)
+        return rv
 
     @command_filter(r'^/ypc(@\S+)?\s+help$')
     async def ypc_help(self, message, *args, **kwargs):
-        return '\n'.join((
+        return ['\n'.join((
             '',
             '/ypc',
             '/ypc add <sentence>',
             '/ypc remove <id>',
             '/ypc list',
             '/ypc help',
-        ))
+        ))]
 
 
 @command_filter(r'^/help(@\S+)?$')
 async def help(message, *args, **kwargs):
-    return '\n'.join((
+    return ['\n'.join((
         '',
         '/ypc',
         '/ypc add <sentence>',
         '/ypc remove <id>',
         '/ypc list',
         '/ypc help',
-    ))
+    ))]
+
+
+def chunks_of(g, size):
+    chunk = []
+    async for item in g:
+        chunk.append(item)
+        if len(chunk) == size:
+            yield chunk
+            chunk = []
+    if chunk:
+        yield chunk
 
 
 async def shell_out(*args, **kwargs):
