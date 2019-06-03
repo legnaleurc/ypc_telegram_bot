@@ -130,7 +130,7 @@ class YPCHandler(object):
             murmur = session.query(db.Murmur)
             for mm_chunk in chunks_of(murmur, 100):
                 msg = ['{0}: {1}'.format(mm.id, mm.sentence) for mm in mm_chunk]
-                msg = '\n' + msg.join('\n')
+                msg = '\n' + '\n'.join(msg)
                 rv.append(msg)
         return rv
 
