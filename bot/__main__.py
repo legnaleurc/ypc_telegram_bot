@@ -160,7 +160,7 @@ async def help(message, *args, **kwargs):
 
 def chunks_of(g, size):
     chunk = []
-    async for item in g:
+    for item in g:
         chunk.append(item)
         if len(chunk) == size:
             yield chunk
