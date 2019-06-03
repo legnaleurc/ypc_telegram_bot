@@ -168,26 +168,6 @@ async def shell_out(*args, **kwargs):
     return out.decode('utf-8')
 
 
-'''
-async def forever():
-    api_token = options.options.api_token
-
-    kel_thuzad = KelThuzad(api_token)
-    ypc = YPCHandler()
-
-    kel_thuzad.add_text_handlers([
-        help,
-        ypc.ypc,
-        ypc.ypc_add,
-        ypc.ypc_remove,
-        ypc.ypc_list,
-        ypc.ypc_help,
-    ])
-
-    await kel_thuzad.poll()
-'''
-
-
 async def setup():
     api_token = options.options.api_token
     dsn = options.options.database
