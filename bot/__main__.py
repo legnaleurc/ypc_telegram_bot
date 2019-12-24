@@ -154,9 +154,9 @@ class YPCHandler(object):
             with db.Session() as session:
                 mm = session.query(db.MurmurStory).filter_by(murmur_id=int(args[1]))
                 if mm.count() < 1:
-                    return args[1] + '??'
+                    return [args[1] + '??']
                 m = mm.first()
-                return m.sentence
+                return [m.sentence]
         except Exception:
             return None
 
@@ -166,7 +166,7 @@ class YPCHandler(object):
             with db.Session() as session:
                 mm = session.query(db.Murmur).filter_by(id=int(args[1]))
                 if mm.count() < 1:
-                    return args[1] + '??'
+                    return [args[1] + '??']
                 reply = str(args[2])
                 story = session.query(db.MurmurStory).filter_by(murmur_id=int(args[1]))
                 if story.count() < 1:
@@ -178,7 +178,7 @@ class YPCHandler(object):
                     story.sentence = str(args[2])
 
                 session.commit()
-                return reply
+                return [reply]
         except Exception:
             return None
 
@@ -189,7 +189,7 @@ class YPCHandler(object):
                 mm = session.query(db.MurmurStory).filter_by(murmur_id=int(args[1]))
                 for m in mm:
                     session.delete(m)
-                return 'story ' + args[1]
+                return ['story ' + args[1]]
         except Exception:
             return None
 
