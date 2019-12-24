@@ -46,6 +46,5 @@ def Session():
 def prepare(dsn):
     global engine
     engine = create_engine(dsn)
-    Base.metadata.create_all(engine)
     global _Session
     _Session = sessionmaker(bind=engine)
