@@ -1,8 +1,9 @@
 from contextlib import contextmanager
 
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, ForeignKey, create_engine
+from sqlalchemy import Column, Integer, String, ForeignKey, create_engine, event
 from sqlalchemy.orm import sessionmaker, relationship
+from sqlalchemy.engine import Engine
 from tornado import options
 
 from . import settings
@@ -11,6 +12,13 @@ from . import settings
 Base = declarative_base()
 engine = None
 _Session = None
+
+
+@event.listens_for(Engine, 'connect')
+def set_sqlite_pragma(dbapi_connection, connection_record):
+    cursor = dbapi_connection.cursor()
+    cursor.execute('PRAGMA foreign_keys=ON')
+    cursor.close()
 
 
 class Murmur(Base):
@@ -59,17 +67,5 @@ def Session():
 def prepare(dsn):
     global engine
     engine = create_engine(dsn)
-
-    # enable sqlite foreign key feature
-    if engine.name.lower() == 'sqlite':
-        try:
-            connection = engine.raw_connection()
-            cursor = connection.cursor()
-            cursor.execute("PRAGMA foreign_keys = ON;")
-            cursor.close()
-        except Exception:
-            print('something GG')
-
-    Base.metadata.create_all(engine)
     global _Session
     _Session = sessionmaker(bind=engine)
