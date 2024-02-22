@@ -1,2 +1,2 @@
-api_token:
-database:
+api_token: 'YOUR_TELEGRAM_BOT_API_TOKEN'
+database: sqlite:///database.db
