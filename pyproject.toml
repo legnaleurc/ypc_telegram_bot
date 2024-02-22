@@ -11,7 +11,7 @@ python = "^3.9"
 PyYAML = "^5.2"
 SQLAlchemy = "^1.3.12"
 "wcpan.telegram" = "^0.3.0.dev7"
-tornado = "^4"
+tornado = "^6"
 alembic = "^1.3.2"
 
 [tool.poetry.group.dev.dependencies]
