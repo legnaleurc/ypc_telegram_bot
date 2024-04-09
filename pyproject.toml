@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "ypc-telegram-bot"
+name = "bot"
 version = "0.1.0"
 description = ""
 authors = ["Wei-Cheng Pan <legnaleurc@gmail.com>"]
@@ -7,12 +7,9 @@ license = "MIT"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.9"
-PyYAML = "^5.2"
-SQLAlchemy = "^1.3.12"
-"wcpan.telegram" = "^0.3.0.dev7"
-tornado = "^4"
-alembic = "^1.3.2"
+python = "^3.12"
+SQLAlchemy = "^2.0.29"
+python-telegram-bot = "^21.0.1"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.3.0"
