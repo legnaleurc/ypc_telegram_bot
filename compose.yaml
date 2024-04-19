@@ -1,0 +1,10 @@
+services:
+  bot:
+    build:
+      dockerfile: Dockerfile
+    environment:
+      API_TOKEN: ${API_TOKEN}
+      DATABASE_URL: sqlite:////mnt/database/bot.sqlite
+    volumes:
+      - ${DATABASE_DIR}:/mnt/database
+    command: poetry run -- python3 -m bot
