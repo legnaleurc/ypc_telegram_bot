@@ -1,3 +1,4 @@
+import re
 from collections.abc import Iterator, Iterable
 from random import choice
 from typing import Self, Protocol
@@ -69,7 +70,15 @@ class ActionDispatcher:
         if not update.message:
             return
 
-        args = context.args or []
+        msg = update.message.text
+        if not msg:
+            return
+
+        args: list[str] = re.split(r"\s+", msg, 2)
+        if len(args) < 1:
+            return
+        # pop "/ypc" token
+        args = args[1:]
 
         for handler in self._handler_list:
             msg_list = handler(args, db=self._db)
