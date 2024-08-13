@@ -36,18 +36,21 @@ class Database:
             id_ = rows.scalar()
             if id_ is None:
                 raise RuntimeError(f"add ${sentence} failed")
+            session.commit()
             return id_
 
     def remove_murmur(self, id: int) -> int:
         with Session(self._engine) as session:
             query = delete(Murmur).filter_by(id=id)
             rows = session.execute(query)
+            session.commit()
             return rows.rowcount
 
     def set_note(self, id: int, note: str) -> None:
         with Session(self._engine) as session:
             query = update(Murmur).filter_by(id=id).values(note=note)
             session.execute(query)
+            session.commit()
 
 
 def initialize(dsn: str):
