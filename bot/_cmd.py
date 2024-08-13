@@ -152,22 +152,31 @@ def action_ypc_note(args: list[str], *, db: Database) -> list[str]:
     try:
         murmur = db.get_murmur(id_)
     except Exception:
-        return ["no such id"]
+        return [f"id {id_} not found"]
+
+    note = murmur.note
+    if not note:
+        return ["no note"]
+
     return [murmur.note]
 
 
 def action_ypc_note_add(args: list[str], *, db: Database) -> list[str]:
-    if len(args) != 3 or args[0] != "add_note":
+    if len(args) != 2 or args[0] != "add_note":
         return []
 
-    id_ = int(args[1])
-    note = args[2]
+    args = re.split(r"\s+", args[1], 1)
+    if len(args) < 2:
+        return ["expected: <id> <string>"]
+
+    id_ = int(args[0])
+    note = args[1]
     db.set_note(id_, note)
 
     try:
         murmur = db.get_murmur(id_)
     except Exception:
-        return ["no such id"]
+        return [f"id {id_} not found"]
 
     msg = f"{murmur.sentence}\n----\n{murmur.note}"
     return [msg]
