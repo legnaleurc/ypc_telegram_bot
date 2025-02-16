@@ -1,3 +1,10 @@
-.venv
+# python
 **/__pycache__
+.venv
+
+# env files
+.env
+.env.*
+
+# editors
 .vscode
